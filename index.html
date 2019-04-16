@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>GOMOKU</title>
+  <meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no">
+	<style>
+		html, body {
+			margin: 0;
+			padding: 0;
+		}
+
+		.layout {
+			display: flex;
+			position: absolute;
+			top: 50%;
+			left: 50%;
+			outline: 10px solid #DDD;
+			transform: translate(-50%, -50%);
+			box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
+		}
+	</style>
+</head>
+<body>
+	<div class="layout">
+		<canvas id="gomoku" width="450" height="450"></canvas>
+	</div>
+	<script type="text/javascript">
+		let dom = document.getElementById('gomoku'),
+				ctx = dom.getContext('2d'),
+				w = ctx.canvas.width,
+				h = ctx.canvas.height,
+				me = true,
+				steps = [],
+				// 定义游戏是否结束
+				over = false,
+				// 定义所有赢法规则
+				wins = [],
+				count = 0,
+				// 定义赢法规则下标
+				myWin = [],
+				cWin = []
+
+		// 给棋盘添加点击事件
+		dom.onclick = function (e) {
+			if (over) return
+			let x = e.offsetX
+			let y = e.offsetY
+			let i = Math.floor(x / 30)
+			let j = Math.floor(y / 30)
+
+			if (steps[i][j] == 0) {
+				drawStep(i, j, me)
+				if (me) {
+					steps[i][j] = 1
+				} else {
+					steps[i][j] = 2
+				}
+				me = !me
+				for (let k = 0; k < count; k++) {
+					if (wins[i][j][k]) {
+						myWin[k]++
+						cWin[k] = 6
+						if (myWin[k] == 5) {
+							window.alert('你赢了！')
+							over = true
+						}
+					}
+				}
+			}
+		}
+
+		// 初始化棋盘
+		function drawLayout() {
+			ctx.save()
+			ctx.beginPath()
+			ctx.strokeStyle = "#BFBFBF"
+			ctx.lineWidth = 1
+			for (var i = 0; i < 15; i++) {
+				ctx.moveTo(15 + i * 30, 15)
+				ctx.lineTo(15 + i * 30, w - 15)
+				ctx.stroke()
+
+				ctx.moveTo(15, 15 + i * 30)
+				ctx.lineTo(w - 15, 15 + i * 30)
+				ctx.stroke()
+			}
+			ctx.closePath()
+
+			// 初始化二维数字棋盘
+			for (var i = 0; i < 15; i++) {
+				steps[i] = []
+				wins[i] = []
+				for (var j = 0; j < 15; j++) {
+					steps[i][j] = []
+					wins[i][j] = []
+				}
+			}
+
+			// 计算出所有赢法规则
+			setWins()
+		}
+
+		// 画棋子
+		function drawStep(x, y, me) {
+			ctx.save()
+			ctx.beginPath()
+			if (me) {
+				ctx.fillStyle = "#000000"
+			} else {
+				ctx.fillStyle = "#D1D1D1"
+			}
+			ctx.arc(x * 30 + 15, y * 30 + 15, 12, 2 * Math.PI, false)
+			ctx.fill()
+		}
+
+ 		// 统计出所有赢法
+		function setWins() {
+			// 横向赢法
+			for (let i = 0; i < 15; i++) {
+				for (let j = 0; j < 11; j++) {
+					for (let k = 0; k < 5; k++) {
+						wins[i][j + k][count] = true
+					}
+					count++
+				}
+			}
+
+			// 纵向赢法
+			for (let i = 0; i < 15; i++) {
+				for (let j = 0; j < 11; j++) {
+					for (let k = 0; k < 5; k++) {
+						wins[j + k][i][count] = true
+					}
+					count++
+				}
+			}
+
+			// 斜线赢法
+			for (let i = 0; i < 11; i++) {
+				for (let j = 0; j < 11; j++) {
+					for (let k = 0; k < 5; k++) {
+						wins[i + k][j + k][count] = true
+					}
+					count++
+				}
+			}
+
+			// 反斜线赢法
+			for (let i = 0; i < 11; i++) {
+				for (let j = 14; j > 3; j--) {
+					for (let k = 0; k < 5; k++) {
+						wins[i + k][j - k][count] = true
+					}
+					count++
+				}
+			}
+
+			// 初始化双发赢法下标的初始值
+			for (var i = 0; i < count.length; i++) {
+				myWin[i] = 0
+				cWin[i] = 0
+			}
+		}
+
+		drawLayout()
+	</script>
+</body>
+</html>
