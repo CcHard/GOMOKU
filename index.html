@@ -20,33 +20,70 @@
 
 		.layout {
 			display: flex;
+    	background: #f1f1f1;
 			position: absolute;
 			top: 50%;
 			left: 50%;
-			outline: 10px solid #DDD;
+			padding: 40px 20px;
+    	border-radius: 20px;
+			border: 8px solid #404040;
 			transform: translate(-50%, -50%);
-			box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
+			box-shadow: 0 0 20px rgba(0, 0, 0, 0.4);
 		}
 
 		.result {
 			width: 200px;
 			padding: 0 40px;
-			font-size: 18px;
+			font-size: 16px;
+			position: relative;
 		}
 
 		.result h3 {
 			font-size: 26px;
 			margin: 10px 20px 40px;		
+			text-align: center;
 		}
 
 		.result ul li {
-			margin: 10px 0;
+			margin: 18px 0;
+			display: flex;
+			align-items: center;
+		}
+
+		.result ul li i {
+			display: inline-block;
+			width: 16px;
+			height: 16px;
+			margin-right: 8px;
+    	vertical-align: middle;
+			border-radius: 50%;
+		}
+
+		.result .black {
+			background-color: #000;
+		}
+
+		.result .white {
+			background-color: #bdbdbd;
 		}
 
 		.result em {
-			font-style: normal;
-			color: red;
-			font-weight: bold;
+			display: none;
+	    width: 22px;
+	    border-radius: 50%;
+	    text-align: center;
+	    background-color: red;
+	    font-style: normal;
+	    color: white;
+	    font-size: 12px;
+	    height: 22px;
+	    line-height: 22px;
+	    margin-left: 20px;
+	    position: relative;
+		}
+
+		.result em:after {
+			content: '赢'
 		}
 
 		.result p {
@@ -56,6 +93,20 @@
 			border: 1px #ccc dashed;
 			font-weight: bold;
 			text-align: center;
+		}
+
+		.result .again {
+			display: none;
+	    padding: 8px 20px;
+	    outline: none;
+	    background-color: #000;
+	    border: 1px solid #000;
+	    color: white;
+	    cursor: pointer;
+	    position: absolute;
+	    bottom: 20px;
+	    left: 50%;
+	    transform: translateX(-50%);
 		}
 
 		.result .show {
@@ -69,11 +120,11 @@
 		<div class="result">
 			<h3>黑白五子棋</h3>
 			<ul>
-				<li>我方： 黑色</li>
-				<li>计算机： 白色</li>
-				<li v-if="over"><em id="result" v-text="result"></em></li>
+				<li><i class="black"></i> 先手方 <em :class="{show: over && result === 'B'}"></em></li>
+				<li><i class="white"></i> 后手方 <em :class="{show: over && result === 'W'}"></em></li>
 			</ul>
 			<p id="over" :class="{show: over}">游戏结束</p>
+			<button class="again" @click="again" :class="{show: over}">再来一局</button>
 		</div>
 	</div>
   <script src="https://cdn.jsdelivr.net/npm/vue@2.6.10/dist/vue.js"></script>
@@ -103,13 +154,33 @@
 			this.w = this.ctx.canvas.width
 			this.h = this.ctx.canvas.height
 			this.drawLayout()
+
+			// 计算出所有赢法规则
+			this.setWins()
     },
     methods: {
+    	// 再来一局
+    	again() {
+    		/*this.me = true
+    		this.over = false
+    		this.result = ''
+
+				// 初始化双发赢法下标的初始值
+				for (var i = 0; i < this.count; i++) {
+					this.myWin[i] = 0
+					this.cWin[i] = 0
+				}
+
+    		this.ctx.clearRect(0, 0, this.w, this.h)
+    		this.drawLayout()*/
+    		window.location.reload()
+    	},
+
 			// 初始化棋盘
 			drawLayout() {
 				this.ctx.save()
 				this.ctx.beginPath()
-				this.ctx.strokeStyle = "#BFBFBF"
+				this.ctx.strokeStyle = "#C1C1C1"
 				this.ctx.lineWidth = 1
 				for (var i = 0; i < 15; i++) {
 					// 横
@@ -123,6 +194,7 @@
 					this.ctx.stroke()
 				}
 				this.ctx.closePath()
+     	 	this.ctx.restore()
 
 				// 初始化二维数字棋盘
 				for (var i = 0; i < 15; i++) {
@@ -133,9 +205,6 @@
 						this.wins[i][j] = []
 					}
 				}
-
-				// 计算出所有赢法规则
-				this.setWins()
 			},
 
 			// 给棋盘添加点击事件
@@ -162,7 +231,7 @@
 					// 我方标识为1
 					this.steps[x][y] = 1
 				} else {
-					this.ctx.fillStyle = "#D1D1D1"
+					this.ctx.fillStyle = "#BDBDBD"
 					// 计算机标识为2
 					this.steps[x][y] = 2
 				}
@@ -304,13 +373,13 @@
 							this.cWin[k]++
 						}
 						if (this.myWin[k] == 5) {
-							this.result = '黑棋赢了！'
+							this.result = 'B'
 							this.over = true
 							break
 						}
 
 						if (this.cWin[k] == 5) {
-							this.result = '白棋赢了！'
+							this.result = 'W'
 							this.over = true
 							break
 						}
